@@ -1,0 +1,32 @@
+# Create the `room-clr` Spring Boot project
+
+Run the following commands in PowerShell to download the project from Spring Initializr and extract it into the `room-clr` folder:
+
+```powershell
+Set-Location "D:\AI DEV\SpringBoot 3 tutorial"
+
+curl.exe --fail --location --silent --show-error --retry 3 -G "https://start.spring.io/starter.zip" `
+  --data-urlencode "type=maven-project" `
+  --data-urlencode "language=java" `
+  --data-urlencode "javaVersion=21" `
+  --data-urlencode "packaging=jar" `
+  --data-urlencode "groupId=com.soulemane.lil" `
+  --data-urlencode "artifactId=room-clr" `
+  --data-urlencode "packageName=com.soulemane.lil.room.clr" `
+  -o ".\room-clr.zip"
+
+if ($LASTEXITCODE -ne 0) { throw "Project download failed; check the error above." }
+
+Expand-Archive -Path ".\room-clr.zip" -DestinationPath ".\room-clr"
+```
+
+## Run the application
+
+Run Spring Boot through the Maven wrapper from the project folder. Do not compile
+`RoomClrApplication.java` directly with `javac`; that command does not include
+the Spring Boot dependencies.
+
+```powershell
+Set-Location "D:\AI DEV\SpringBoot 3 tutorial\room-clr"
+.\mvnw.cmd spring-boot:run
+```
