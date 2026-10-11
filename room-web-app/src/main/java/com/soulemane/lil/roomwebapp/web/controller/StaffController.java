@@ -1,31 +1,26 @@
 package com.soulemane.lil.roomwebapp.web.controller;
 
-import com.soulemane.lil.roomwebapp.data.entity.StaffMember;
-import com.soulemane.lil.roomwebapp.data.repository.StaffRepository;
-import com.soulemane.lil.roomwebapp.web.model.Staff;
+
+import com.soulemane.lil.roomwebapp.service.StaffService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import java.util.ArrayList;
-import java.util.List;
+
 
 @Controller
 @RequestMapping("/staff")
 public class StaffController {
 
-  private final StaffRepository staffRepository;
+  private final StaffService staffService;
 
-  public StaffController(StaffRepository staffRepository) {
-    this.staffRepository = staffRepository;
+  public StaffController(StaffService staffService) {
+    this.staffService = staffService;
   }
 
   @GetMapping
   public String getStaffPage(Model model){
-    List<StaffMember> staffMembers = this.staffRepository.findAll();
-    List<Staff> staff = new ArrayList<>(staffMembers.size());
-    staffMembers.forEach(s -> staff.add(new Staff(s.getEmployeeId(), s.getFirstName(), s.getLastName(), s.getPosition().toString())));
-    model.addAttribute("staff", staff);
+    model.addAttribute("staff", this.staffService.getAllStaff());
     return "staff";
   }
 }

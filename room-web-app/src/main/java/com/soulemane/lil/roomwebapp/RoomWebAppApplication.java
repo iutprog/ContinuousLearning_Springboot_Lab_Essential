@@ -15,15 +15,4 @@ public class RoomWebAppApplication {
 		SpringApplication.run(RoomWebAppApplication.class, args);
 	}
 
-	@Bean
-	public CommandLineRunner run(RoomRepository roomRepository, StaffRepository staffRepository){
-		return args -> {
-		System.out.println("**** ROOMS ****");
-		roomRepository.findAll().forEach(System.out::println);
-		System.out.println("\n\n**** STAFF ****");
-		staffRepository.findAll().forEach(System.out::println);
-		};
-	}
-
-
 }
