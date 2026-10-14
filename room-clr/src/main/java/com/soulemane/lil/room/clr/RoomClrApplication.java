@@ -1,5 +1,12 @@
 package com.soulemane.lil.room.clr;
 
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,18 +24,45 @@ public class RoomClrApplication {
     SpringApplication.run(RoomClrApplication.class, args);
   }
 
+  private static final String QUEUE_NAME = "room-cleaner";
+  private static final String EXCHANGE_NAME = "operations";
+
+  @Bean
+  public Queue queue() {
+    return new Queue(QUEUE_NAME, false);
+  }
+
+  @Bean 
+  public TopicExchange exchange() {
+    return new TopicExchange(EXCHANGE_NAME);
+  }
+  
+  @Bean 
+  public Binding binding(Queue queue, TopicExchange exchange) {
+    return BindingBuilder.bind(queue).to(exchange).with("landon.#");
+  }
+
   @Bean
   public RestTemplate restTemplate(){
     return new RestTemplate();
   }
 
   @Bean
-  public CommandLineRunner run(RestTemplate restTemplate) {
+  public CommandLineRunner run(RestTemplate restTemplate, RabbitTemplate rabbitTemplate, ObjectMapper objectMapper) {
     return args -> {
       ResponseEntity<List<Room>> rooms = restTemplate.exchange("http://localhost:8080/api/rooms",
           HttpMethod.GET, null, new ParameterizedTypeReference<List<Room>>() {
           });
-      rooms.getBody().forEach(System.out::println);
+      rooms.getBody().forEach(r -> {
+        AsyncPayload payload = new AsyncPayload();
+        payload.setId(r.getId());
+        payload.setModel("ROOM");
+        try{
+          rabbitTemplate.convertAndSend("operations", "landon.rooms.cleaner", objectMapper.writeValueAsString(payload));
+        }catch (JacksonException e){
+          throw new RuntimeException(e);
+        }
+      });
     };
   }
 
